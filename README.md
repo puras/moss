@@ -18,3 +18,19 @@ import os
 
 os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 ```
+
+## 安装Unsloth
+
+```
+pip install unsloth
+pip uninstall unsloth -y && pip install --upgrade --no-cache-dir --no-deps git+https://github.com/unslothai/unsloth.git
+```
+
+## Ollama创建本地模型
+
+```
+ollama create [model_name] --file /YOUR/PATH/TO/Modelfile
+#  示例
+ollama create DeepSeek-R1-Distill-Qwen-1.5B_f16 --file ./dist/DeepSeek-R1-Distill-Qwen-1.5B_f16.mf
+ollama create DeepSeek-R1-Distill-Qwen-1.5B-ming --file ./dist/DeepSeek-R1-Distill-Qwen-1.5B-ming.mf
+```

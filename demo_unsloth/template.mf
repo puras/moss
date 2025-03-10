@@ -1,0 +1,1 @@
+FROM ./Llama-3.2-3B-Instruct-moss_f16.gguf
