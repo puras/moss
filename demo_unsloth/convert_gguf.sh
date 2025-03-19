@@ -1,0 +1,1 @@
+llama.cpp/convert_hf_to_gguf.py --outfile DeepSeek-R1-Distill-Qwen-32B-pedagogy_f16 --outtype f16 DeepSeek-R1-Distill-Qwen-32B-pedagogy_merged-16bit
