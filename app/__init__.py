@@ -1,9 +1,12 @@
 from flask import Flask, request
+from sqlalchemy.exc import SQLAlchemyError
+
 from app.config import config
 from app.extensions import db, migrate, jwt, cors
 from time import time
 
 from app.utils.logger import setup_logger
+from app.utils.response import R
 
 
 def create_app(config_name='default'):
@@ -82,8 +85,15 @@ def register_blueprints(app):
 def register_error_handlers(app):
     @app.errorhandler(404)
     def handle_404_error(e):
-        return {"error": "Not found", "message": str(e)}, 404
+        return R.not_found("Not found")
         
     @app.errorhandler(500)
     def handle_500_error(e):
-        return {"error": "Internal server error", "message": str(e)}, 500
+        app.logger.debug(str(e))
+        return R.fail("Internal server error")
+
+    # 注册全局错误处理器
+    @app.errorhandler(SQLAlchemyError)
+    def handle_db_error(error):
+        app.logger.debug("SQLAlchemyError", error)
+        return R.fail("数据库操作错误")
