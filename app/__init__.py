@@ -1,7 +1,6 @@
 from flask import Flask, request
 from app.config import config
 from app.extensions import db, migrate, jwt, cors
-import logging
 from time import time
 
 from app.utils.logger import setup_logger
@@ -44,7 +43,7 @@ def register_request_logging(app):
         
         # 获取请求数据
         request_data = request.get_json() if request.is_json else None
-        
+
         # 获取响应数据
         response_data = response.get_json() if response.is_json else None
         
