@@ -6,8 +6,6 @@ from app.extensions import db, migrate, jwt, cors
 from time import time
 
 from app.utils.logger import setup_logger
-from app.utils.response import R
-
 
 def create_app(config_name='default'):
     app = Flask(__name__)
@@ -83,6 +81,8 @@ def register_blueprints(app):
             print(f"{rule.endpoint}: {rule.rule} [{','.join(rule.methods)}]")
 
 def register_error_handlers(app):
+    from app.utils.response import R
+
     @app.errorhandler(404)
     def handle_404_error(e):
         return R.not_found("Not found")

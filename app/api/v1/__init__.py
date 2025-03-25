@@ -1,5 +1,7 @@
 from flask import Blueprint
 
+from app.modules.prompt.api import prompt_bp
+
 # 创建API v1主蓝图
 api_v1_bp = Blueprint('api_v1', __name__)
 
@@ -9,3 +11,5 @@ from app.api.v1.auth import auth_bp
 
 api_v1_bp.register_blueprint(uc_bp)
 api_v1_bp.register_blueprint(auth_bp)
+
+api_v1_bp.register_blueprint(prompt_bp)
