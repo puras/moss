@@ -5,11 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fb870b37-3f19-4b79-8ed5-e81321b32c7e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/ucenter/role_resource.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/ucenter/role_resource.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs/app.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/app.log" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -140,7 +137,7 @@
       <workItem from="1742873187513" duration="370000" />
       <workItem from="1742873838632" duration="929000" />
       <workItem from="1742879751823" duration="619000" />
-      <workItem from="1742880380818" duration="3550000" />
+      <workItem from="1742880380818" duration="4223000" />
     </task>
     <servers />
   </component>
