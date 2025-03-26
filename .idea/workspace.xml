@@ -5,21 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fb870b37-3f19-4b79-8ed5-e81321b32c7e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/api/v1/ds/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/v1/ds/project.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/v1/ds/question.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/v1/llm/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/v1/llm/chat.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/v1/llm/model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/db/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/db/project.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/llm/core/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/lib/llm/core/ollama.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs/app.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/app.log" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,29 +57,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Flask server.Flask (wsgi.py).executor": "Run",
-    "Python.Run.executor": "Run",
-    "Python.ds_gen.executor": "Run",
-    "Python.main (1).executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.test.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/Users/puras/workspace/proj/moss/app/api/v1/ds",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Flask server.Flask (wsgi.py).executor&quot;: &quot;Run&quot;,
+    &quot;Python.Run.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ds_gen.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/puras/workspace/proj/moss/app/api/v1/ds&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/app/api/v1/ds" />
@@ -152,7 +139,7 @@
       <workItem from="1742873187513" duration="370000" />
       <workItem from="1742873838632" duration="929000" />
       <workItem from="1742879751823" duration="619000" />
-      <workItem from="1742880380818" duration="11586000" />
+      <workItem from="1742880380818" duration="12545000" />
     </task>
     <servers />
   </component>
