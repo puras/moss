@@ -21,16 +21,16 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), '../dev.sqlite')
+        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), '../instance/dev.sqlite')
 
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
-        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), '../test.sqlite')
+        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), '../instance/test.sqlite')
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), '../prod.sqlite')
+        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), '../instance/prod.sqlite')
 
 config = {
     'development': DevelopmentConfig,
