@@ -1,4 +1,6 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint
+
+from app.utils.response import R
 
 role_bp = Blueprint('roles', __name__, url_prefix='/roles')
 
@@ -9,4 +11,4 @@ def get_roles():
         "description": "hello",
         "created_by": "puras"
     }
-    return jsonify(item), 200
+    return R.bad_request(item, {"what": "wahaha"})
