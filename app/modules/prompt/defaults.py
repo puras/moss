@@ -72,7 +72,8 @@ DEFAULT_TEMPLATES = {
             "author": "System",
             "description": "通用优化提示词，适用于大多数场景",
             "template_type": "optimize"
-        }
+        },
+        "builtin": True
     },
     "output-format-optimize": {
         "id": "output-format-optimize",
@@ -170,13 +171,13 @@ DEFAULT_TEMPLATES = {
 
 请基于以上模板，优化并扩展以下prompt，确保内容专业、完整且结构清晰，注意不要携带任何引导词或解释，不要使用代码块包围：{question}
     """,
-    metadata: {
-      version: '1.3.0',
-      lastModified: Date.now(),
-      author: 'System',
-      description: '适用于带格式要求的大多数场景',
-      templateType: 'optimize'
+    "metadata": {
+      "version": '1.3.0',
+      "lastModified": datetime.now().timestamp(),
+      "author": 'System',
+      "description": '适用于带格式要求的大多数场景',
+      "templateType": 'optimize'
     },
-    isBuiltin: true
-  }}
+    "builtin": True
+  }
 }
