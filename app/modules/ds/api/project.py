@@ -7,7 +7,7 @@ proj_bp = Blueprint('project', __name__, url_prefix='/projects')
 
 @proj_bp.route('', methods=['GET'])
 @async_route
-async def list():
+async def get_list():
     projects = await get_projects()
     return jsonify(projects), 200
 

@@ -38,6 +38,27 @@ async def get_projects() -> list[dict[str, Any]]:
 
     return projects
 
+async def get_project(project_id: str):
+    """
+    获取项目详情
+    Args:
+        project_id: 项目ID
+    Returns:
+        Optional[Dict]: 项目信息
+    """
+    project_root = await get_project_root()
+    project_path = os.path.join(project_root, project_id)
+    config_path = os.path.join(project_path, 'config.json')
+
+    config_data = await read_json_file(config_path)
+    if not config_data:
+        return None
+
+    return {
+        'id': project_id,
+        **config_data
+    }
+
 async def create_project(project_data: dict[str, Any]) -> dict[str, Any]:
     """
     创建新项目
@@ -80,3 +101,22 @@ async def create_project(project_data: dict[str, Any]) -> dict[str, Any]:
         await write_json_file(model_config_path, project_data['modelConfig'])
 
     return {'id': project_id, **project_data}
+
+async def update_project(project_id: str, project_data: dict[str, Any]):
+    """
+    更新项目配置
+    Args:
+        project_id: 项目ID
+        project_data: 项目数据
+    Returns:
+        Dict: 更新后的项目信息
+    """
+    project_root = await get_project_root()
+    project_path = os.path.join(project_root, project_id)
+    config_path = os.path.join(project_path, 'config.json')
+
+    await write_json_file(config_path, project_data)
+    return {
+        'id': project_id,
+        **project_data
+    }
