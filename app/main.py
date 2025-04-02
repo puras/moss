@@ -76,7 +76,11 @@ def create_app():
         llm_model_max_token_size=32768,
         llm_model_kwargs={
             "host": "http://192.168.0.100:11434",
-            "options": {"num_ctx": 32768},
+            "options": {
+                "num_ctx": 32768,
+                "temperature": 0.7,
+                "prompt_template": settings.LLM_PROMPT_TEMPLATE
+            },
         },
         embedding_func=EmbeddingFunc(
             embedding_dim=768,

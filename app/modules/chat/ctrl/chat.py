@@ -60,12 +60,14 @@ def create_chat_routes(rag: LightRAG):
             async def stream_generator():
                 if isinstance(response, str):
                     # If it's a string, send it all at once
+                    logging.info(f"response: {json.dumps({'response': response})}")
                     yield f"{json.dumps({'response': response})}\n"
                 else:
                     # If it's an async generator, send chunks one by one
                     try:
                         async for chunk in response:
                             if chunk:  # Only send non-empty content
+                                logging.info(f"response: {json.dumps({'response': chunk})}")
                                 yield f"{json.dumps({'response': chunk})}\n"
                     except Exception as e:
                         logging.error(f"Streaming error: {str(e)}")

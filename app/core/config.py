@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-super-secret-key")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     ALLOWED_ORIGINS: List[str] = [
+        "*",
         "http://localhost",
         "http://localhost:8000",
         "http://localhost:3000",
@@ -38,6 +39,11 @@ class Settings(BaseSettings):
     STORAGE_DIR: str = os.getenv(
         "STORAGE_DIR",
         "./rag_storage"
+    )
+
+    LLM_PROMPT_TEMPLATE: str = os.getenv(
+        "LLM_PROMPT_TEMPLATE",
+        ""
     )
     
     class Config:
