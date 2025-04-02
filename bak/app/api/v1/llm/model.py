@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-from bak.app.lib.llm.core import LLMClient
+from app.lib.llm.core import LLMClient
 from bak.app.utils.async_utils import async_route
 
 mb_bp = Blueprint('model', __name__, url_prefix='/model')

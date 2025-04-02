@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-from bak.app.lib.llm.core import LLMClient
+from app.lib.llm.core import LLMClient
 from bak.app.utils.async_utils import async_route
 
 chat_bp = Blueprint('chat', __name__, url_prefix='/chat')

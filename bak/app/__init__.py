@@ -72,7 +72,7 @@ def register_extensions(app):
 
 def register_blueprints(app):
     from bak.app.api.v1 import api_v1_bp
-    app.register_blueprint(api_v1_bp, url_prefix='/api/v1')
+    app.register_blueprint(api_v1_bp, url_prefix='/ctrl/v1')
 
     # 打印蓝图信息
     if app.debug:

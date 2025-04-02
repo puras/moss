@@ -3,9 +3,9 @@ import os
 from flask import Blueprint, request
 from werkzeug.utils import secure_filename
 
-from bak.app.lib.db import get_project_root, ensure_dir
-from bak.app.lib.db.project import get_project, update_project
-from bak.app.lib.db.texts import get_files
+from app.lib.db import get_project_root, ensure_dir
+from app.lib.db.project import get_project, update_project
+from app.lib.db.texts import get_files
 from bak.app.utils.async_utils import async_route
 from bak.app.utils.response import R
 

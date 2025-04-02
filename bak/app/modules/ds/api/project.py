@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 
-from bak.app.lib.db.project import get_projects, create_project
+from app.lib.db.project import get_projects, create_project
 from bak.app.utils.async_utils import async_route
 
 proj_bp = Blueprint('project', __name__, url_prefix='/projects')

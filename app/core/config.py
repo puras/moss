@@ -27,7 +27,17 @@ class Settings(BaseSettings):
     # 数据库配置
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL", 
-        "sqlite:///./moss.db"
+        "sqlite+aiosqlite:///./moss.db"  # 使用异步SQLite驱动
+    )
+
+    # LIGHT_RAG
+    INPUT_DIR: str = os.getenv(
+        "INPUT_DIR",
+        "./inputs"
+    )
+    STORAGE_DIR: str = os.getenv(
+        "STORAGE_DIR",
+        "./rag_storage"
     )
     
     class Config:
