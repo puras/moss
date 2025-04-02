@@ -1,14 +1,121 @@
 import json
 import logging
+import requests
+from typing import Optional, List, Dict, Any
 
 from ascii_colors import trace_exception
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+
 from lightrag import LightRAG, QueryParam
-from lightrag.api.routers.query_routes import QueryResponse, QueryRequest
+from lightrag.api.routers.query_routes import QueryRequest, QueryResponse
 
 router = APIRouter(prefix="/chat", tags=["会话"])
 
+# 添加OpenAI请求模型
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+class CompletionsRequest(BaseModel):
+    model: str
+    messages: List[ChatMessage]
+    temperature: Optional[float] = 0.7
+    stream: Optional[bool] = False
+    max_tokens: Optional[int] = None
+
 def create_chat_routes(rag: LightRAG):
+    
+    @router.post("/completions")
+    async def completions(request: CompletionsRequest):
+        try:
+            messages = request.messages
+            if not messages:
+                raise HTTPException(status_code=400, detail="消息列表不能为空")
+
+            # 转换消息格式为Ollama格式
+            ollama_messages = [{"role": msg.role, "content": msg.content} for msg in messages]
+            
+            # 准备请求数据
+            data = {
+                "model": request.model or "deepseek-r1:32b",
+                "messages": ollama_messages,
+                "stream": request.stream,
+                "options": {
+                    "temperature": request.temperature or 0.5
+                }
+            }
+
+            if request.stream:
+                async def stream_generator():
+                    # 使用requests进行流式请求
+                    response = requests.post(
+                        "http://192.168.0.100:11434/api/chat",
+                        json=data,
+                        stream=True
+                    )
+                    
+                    for line in response.iter_lines():
+                        if line:
+                            try:
+                                chunk = json.loads(line)
+                                if "error" in chunk:
+                                    yield f"data: {json.dumps({'error': chunk['error']})}\n\n"
+                                    continue
+                                    
+                                chunk_data = {
+                                    "choices": [{
+                                        "delta": {"content": chunk.get("message", {}).get("content", "")},
+                                        "finish_reason": "stop" if chunk.get("done", False) else None,
+                                        "index": 0
+                                    }]
+                                }
+                                yield f"data: {json.dumps(chunk_data)}\n\n"
+                                
+                                if chunk.get("done", False):
+                                    yield "data: [DONE]\n\n"
+                            except json.JSONDecodeError as e:
+                                logging.error(f"JSON decode error: {str(e)}")
+                                continue
+
+                return StreamingResponse(
+                    stream_generator(),
+                    media_type="text/event-stream",
+                    headers={
+                        "Cache-Control": "no-cache",
+                        "Connection": "keep-alive",
+                        "Content-Type": "text/event-stream",
+                        "X-Accel-Buffering": "no",
+                    }
+                )
+            else:
+                # 非流式请求
+                response = requests.post(
+                    "http://localhost:11434/api/chat",
+                    json=data
+                )
+                
+                if response.status_code != 200:
+                    raise HTTPException(status_code=response.status_code, detail=response.text)
+                
+                result = response.json()
+                return {
+                    "choices": [{
+                        "message": {
+                            "role": "assistant",
+                            "content": result.get("message", {}).get("content", "")
+                        },
+                        "finish_reason": "stop",
+                        "index": 0
+                    }]
+                }
+
+        except Exception as e:
+            trace_exception(e)
+            raise HTTPException(status_code=500, detail=str(e))
+
+
     @router.post("/rag/query")
     async def rag_query_text(request: QueryRequest):
         try:
@@ -86,6 +193,8 @@ def create_chat_routes(rag: LightRAG):
         except Exception as e:
             trace_exception(e)
             raise HTTPException(status_code=500, detail=str(e))
+
+    
 
     return router
 

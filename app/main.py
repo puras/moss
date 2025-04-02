@@ -20,7 +20,6 @@ from app.routes import create_routes
 from app.core.logging import setup_logging
 
 def create_app():
-
     doc_manager = DocumentManager(settings.INPUT_DIR)
 
     @asynccontextmanager
@@ -142,6 +141,7 @@ def main():
         "log_config": None,  # Disable default config
     }
     if settings.DEBUG:
+        print("Starting Uvicorn server in development mode")
         uvicorn_config["app"] = "app.main:create_app"
         uvicorn_config["reload"] = settings.DEBUG
     else:
