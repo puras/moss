@@ -24,6 +24,7 @@ class CompletionsRequest(BaseModel):
     temperature: Optional[float] = 0.7
     stream: Optional[bool] = False
     max_tokens: Optional[int] = None
+    mode: Optional[str] = None
 
 def create_chat_routes(rag: LightRAG):
     
@@ -115,6 +116,87 @@ def create_chat_routes(rag: LightRAG):
             trace_exception(e)
             raise HTTPException(status_code=500, detail=str(e))
 
+
+    @router.post("/rag/completions")
+    async def rag_completions(request: CompletionsRequest):
+        try:
+            # 将请求转换为RAG查询格式
+            messages = request.messages
+            if not messages:
+                raise HTTPException(status_code=400, detail="消息列表不能为空")
+
+            # 提取最后一条用户消息作为查询
+            last_message = messages[-1]
+            if last_message.role != "user":
+                raise HTTPException(status_code=400, detail="最后一条消息必须是用户消息")
+
+            query = last_message.content
+            param = QueryParam(
+                mode=request.mode or 'hybird',
+                stream=request.stream
+            )
+
+            if request.stream:
+                # 流式响应
+                from fastapi.responses import StreamingResponse
+
+                async def stream_generator():
+                    response = await rag.aquery(query, param=param)
+                    if isinstance(response, str):
+                        chunk_data = {
+                            "choices": [{
+                                "delta": {"content": response},
+                                "finish_reason": "stop",
+                                "index": 0
+                            }]
+                        }
+                        yield f"data: {json.dumps(chunk_data)}\n\n"
+                    else:
+                        try:
+                            async for chunk in response:
+                                if chunk:
+                                    chunk_data = {
+                                        "choices": [{
+                                            "delta": {"content": chunk},
+                                            "finish_reason": None,
+                                            "index": 0
+                                        }]
+                                    }
+                                    yield f"data: {json.dumps(chunk_data)}\n\n"
+                        except Exception as e:
+                            logging.error(f"Streaming error: {str(e)}")
+                            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+                    
+                    # 发送结束标记
+                    yield "data: [DONE]\n\n"
+
+                return StreamingResponse(
+                    stream_generator(),
+                    media_type="text/event-stream",
+                    headers={
+                        "Cache-Control": "no-cache",
+                        "Connection": "keep-alive",
+                        "Content-Type": "text/event-stream",
+                        "X-Accel-Buffering": "no",
+                    }
+                )
+            else:
+                # 非流式响应
+                response = await rag.aquery(query, param=param)
+                return {
+                    "choices": [{
+                        "message": {
+                            "role": "assistant",
+                            "content": str(response)
+                        },
+                        "finish_reason": "stop",
+                        "index": 0
+                    }]
+                }
+
+        except Exception as e:
+            trace_exception(e)
+            raise HTTPException(status_code=500, detail=str(e))
 
     @router.post("/rag/query")
     async def rag_query_text(request: QueryRequest):

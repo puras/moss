@@ -1,6 +1,8 @@
+import argparse
 import asyncio
 import logging
 import os
+import sys
 from contextlib import asynccontextmanager
 
 from ascii_colors import ASCIIColors
@@ -13,13 +15,16 @@ from lightrag.api.routers.document_routes import DocumentManager, run_scanning_p
 from lightrag.kg.shared_storage import initialize_pipeline_status, get_namespace_data, get_pipeline_status_lock
 from lightrag.llm.ollama import ollama_model_complete, ollama_embed
 from lightrag.utils import EmbeddingFunc
+import pipmaster as pm
 from starlette.exceptions import HTTPException
 
 from app.core.config import settings
 from app.routes import create_routes
 from app.core.logging import setup_logging
+from app.util import check_env_file, parse_args, display_splash_screen
 
-def create_app():
+
+def create_app(args: argparse.Namespace) -> FastAPI:
     doc_manager = DocumentManager(settings.INPUT_DIR)
 
     @asynccontextmanager
@@ -130,27 +135,49 @@ def create_app():
 
     return app
 
+def check_and_install_dependencies():
+    required_packages = [
+        "unicorn",
+        "tiktoken",
+        "fastapi",
+    ]
+    for package in required_packages:
+        if not pm.is_installed(package):
+            print(f"Installing {package}...")
+            pm.install(package)
+            print(f"{package} installed successfully.")
+
 
 def main():
+    if "GUNICORN_CMD_ARGS" in os.environ:
+        print("Running under Gunicorn - worker management handled by Gunicorn.")
+        return
+
+    if not check_env_file():
+        sys.exit(1)
+
     setup_logging()
+
+    args = parse_args(is_uvicorn_mode=True)
+    display_splash_screen(args)
+
     # Start Uvicorn in single process mode
     import uvicorn
     uvicorn_config = {
-        "host": settings.HOST,
-        "port": settings.PORT,
+        "host": args.host,
+        "port": args.port,
         "log_config": None,  # Disable default config
     }
     if settings.DEBUG:
         print("Starting Uvicorn server in development mode")
         uvicorn_config["app"] = "app.main:create_app"
         uvicorn_config["reload"] = settings.DEBUG
-    else:
-        app = create_app()
-        uvicorn_config["app"] = app
         uvicorn_config["workers"] = settings.WORKERS
+    else:
+        app = create_app(args)
+        uvicorn_config["app"] = app
 
-    print(f"Starting Uvicorn server in single-process mode on {settings.HOST}:{settings.PORT}")
-    print(uvicorn_config)
+    print(f"Starting Uvicorn server in single-process mode on {args.host}:{args.port}")
     uvicorn.run(**uvicorn_config)
 
 if __name__ == "__main__":
