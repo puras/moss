@@ -11,6 +11,8 @@ from pydantic import BaseModel
 from lightrag import LightRAG, QueryParam
 from lightrag.api.routers.query_routes import QueryRequest, QueryResponse
 
+from app.core.config import settings
+
 router = APIRouter(prefix="/chat", tags=["会话"])
 
 # 添加OpenAI请求模型
@@ -40,7 +42,7 @@ def create_chat_routes(rag: LightRAG):
             
             # 准备请求数据
             data = {
-                "model": request.model or "deepseek-r1:32b",
+                "model": request.model or settings.LLM_MODEL_NAME or "deepseek-r1:32b",
                 "messages": ollama_messages,
                 "stream": request.stream,
                 "options": {
@@ -52,7 +54,11 @@ def create_chat_routes(rag: LightRAG):
                 async def stream_generator():
                     # 使用requests进行流式请求
                     response = requests.post(
-                        "http://192.168.0.100:11434/api/chat",
+                        f"{settings.LLM_MODEL_HOST}/api/chat",
+                        json=data,
+                        stream=True
+                    ) if settings.LLM_MODEL == 'ollama' else requests.post(
+                        f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
                         json=data,
                         stream=True
                     )
@@ -93,8 +99,11 @@ def create_chat_routes(rag: LightRAG):
             else:
                 # 非流式请求
                 response = requests.post(
-                    "http://localhost:11434/api/chat",
+                    f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
                     json=data
+                ) if settings.LLM_MODEL == 'ollama' else requests.post(
+                    f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
+                    json=data,
                 )
                 
                 if response.status_code != 200:
@@ -275,8 +284,6 @@ def create_chat_routes(rag: LightRAG):
         except Exception as e:
             trace_exception(e)
             raise HTTPException(status_code=500, detail=str(e))
-
-    
 
     return router
 

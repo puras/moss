@@ -6,7 +6,7 @@ WORKDIR /work
 
 COPY . /work/
 
-RUN chmod +x /work/start.sh && pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && pip install --no-cache-dir -r requirements.txt
+RUN rm .env && mv .env.prod .env && chmod +x /work/start.sh && pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && pip install --no-cache-dir -r requirements.txt
 
 ARG PORT=8000
 EXPOSE ${PORT}

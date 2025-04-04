@@ -13,7 +13,7 @@ from fastapi.exceptions import RequestValidationError
 from lightrag import LightRAG
 from lightrag.api.routers.document_routes import DocumentManager, run_scanning_process
 from lightrag.kg.shared_storage import initialize_pipeline_status, get_namespace_data, get_pipeline_status_lock
-from lightrag.llm.ollama import ollama_model_complete, ollama_embed
+from lightrag.types import GPTKeywordExtractionFormat
 from lightrag.utils import EmbeddingFunc
 import pipmaster as pm
 from starlette.exceptions import HTTPException
@@ -25,7 +25,7 @@ from app.util import check_env_file, parse_args, display_splash_screen
 
 
 def create_app(args: argparse.Namespace) -> FastAPI:
-    doc_manager = DocumentManager(settings.INPUT_DIR)
+    doc_manager = DocumentManager(settings.LIGHTRAG_INPUT_DIR)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -72,25 +72,71 @@ def create_app(args: argparse.Namespace) -> FastAPI:
         allow_headers=["*"],
     )
 
+    if settings.LIGHTRAG_LLM_MODEL == 'ollama':
+        from lightrag.llm.ollama import ollama_model_complete
+    else:
+        from lightrag.llm.openai import openai_complete_if_cache
+
+    if settings.LIGHTRAG_EMBED_MODEL == 'ollama':
+        from lightrag.llm.ollama import ollama_embed
+    else:
+        from lightrag.llm.openai import openai_embed
+
+    async def openai_model_complete(
+            prompt,
+            system_prompt=None,
+            history_messages=None,
+            keyword_extraction=False,
+            **kwargs,
+    ) -> str:
+        keyword_extraction = kwargs.pop("keyword_extraction", None)
+        if keyword_extraction:
+            kwargs["response_format"] = GPTKeywordExtractionFormat
+        if history_messages is None:
+            history_messages = []
+        kwargs["temperature"] = settings.LIGHTRAG_LLM_MODEL_TEMPERATURE
+        return await openai_complete_if_cache(
+            settings.LIGHTRAG_LLM_MODEL_NAME,
+            prompt,
+            system_prompt=system_prompt,
+            history_messages=history_messages,
+            base_url=settings.LIGHTRAG_LLM_MODEL_HOST,
+            api_key=settings.LIGHTRAG_LLM_MODEL_API_KEY,
+            **kwargs,
+        )
+
     rag = LightRAG(
-        working_dir=settings.STORAGE_DIR,
-        llm_model_func=ollama_model_complete,
-        llm_model_name="deepseek-r1:32b",
-        llm_model_max_async=4,
-        llm_model_max_token_size=32768,
+        working_dir=settings.LIGHTRAG_STORAGE_DIR,
+        llm_model_func=ollama_model_complete
+        if settings.LLM_MODEL == 'ollama'
+        else openai_model_complete,
+        llm_model_name=settings.LIGHTRAG_LLM_MODEL_NAME,
+        llm_model_max_async=settings.LIGHTRAG_LLM_MODEL_MAX_ASYNC,
+        llm_model_max_token_size=settings.LIGHTRAG_LLM_MODEL_MAX_TOKEN_SIZE,
         llm_model_kwargs={
-            "host": "http://192.168.0.100:11434",
+            "host": settings.LIGHTRAG_LLM_MODEL_HOST,
             "options": {
                 "num_ctx": 32768,
-                "temperature": 0.7,
-                "prompt_template": settings.LLM_PROMPT_TEMPLATE
+                "temperature": settings.LIGHTRAG_LLM_MODEL_TEMPERATURE,
+                "prompt_template": settings.LIGHTRAG_LLM_MODEL_PROMPT_TEMPLATE
             },
+            "api_key": settings.LIGHTRAG_LLM_MODEL_API_KEY,
         },
         embedding_func=EmbeddingFunc(
-            embedding_dim=768,
-            max_token_size=8192,
+            embedding_dim=settings.LIGHTRAG_EMBED_MODEL_DIM,
+            max_token_size=settings.LIGHTRAG_EMBED_MODEL_MAX_TOKEN_SIZE,
             func=lambda texts: ollama_embed(
-                texts, embed_model="nomic-embed-text", host="http://192.168.0.100:11434"
+                texts,
+                embed_model=settings.LIGHTRAG_EMBED_MODEL_NAME,
+                host=settings.LIGHTRAG_EMBED_MODEL_HOST,
+                api_key=settings.LIGHTRAG_EMBED_MODEL_API_KEY,
+            )
+            if settings.LIGHTRAG_EMBED_MODEL=='ollama'
+            else openai_embed(
+                texts,
+                embed_model=settings.LIGHTRAG_EMBED_MODEL_NAME,
+                host=settings.LIGHTRAG_EMBED_MODEL_HOST,
+                api_key=settings.LIGHTRAG_EMBED_MODEL_API_KEY,
             ),
         ),
     )
