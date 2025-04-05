@@ -80,8 +80,8 @@ def create_chat_routes(rag: LightRAG):
                                 }
                                 yield f"data: {json.dumps(chunk_data)}\n\n"
                                 
-                                if chunk.get("done", False):
-                                    yield "data: [DONE]\n\n"
+                                # if chunk.get("done", False):
+                                #     yield "data: [DONE]\n\n"
                             except json.JSONDecodeError as e:
                                 logging.error(f"JSON decode error: {str(e)}")
                                 continue
@@ -163,6 +163,7 @@ def create_chat_routes(rag: LightRAG):
                     else:
                         try:
                             async for chunk in response:
+                                logging.info(f"chunk: {chunk}\n")
                                 if chunk:
                                     chunk_data = {
                                         "choices": [{
@@ -172,12 +173,21 @@ def create_chat_routes(rag: LightRAG):
                                         }]
                                     }
                                     yield f"data: {json.dumps(chunk_data)}\n\n"
+                                else:
+                                    chunk_data = {
+                                        "choices": [{
+                                            "delta": {"content": ""},
+                                            "finish_reason": "stop",
+                                            "index": 0
+                                        }]
+                                    }
+                                    yield f"data: {json.dumps(chunk_data)}\n\n"
                         except Exception as e:
                             logging.error(f"Streaming error: {str(e)}")
                             yield f"data: {json.dumps({'error': str(e)})}\n\n"
                     
                     # 发送结束标记
-                    yield "data: [DONE]\n\n"
+                    # yield "data: [DONE]\n\n"
 
                 return StreamingResponse(
                     stream_generator(),

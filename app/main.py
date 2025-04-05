@@ -23,8 +23,8 @@ from app.routes import create_routes
 from app.core.logging import setup_logging
 from app.util import check_env_file, parse_args, display_splash_screen
 
-
-def create_app(args: argparse.Namespace) -> FastAPI:
+# args: argparse.Namespace
+def create_app() -> FastAPI:
     doc_manager = DocumentManager(settings.LIGHTRAG_INPUT_DIR)
 
     @asynccontextmanager
@@ -209,6 +209,7 @@ def main():
 
     # Start Uvicorn in single process mode
     import uvicorn
+
     uvicorn_config = {
         "host": args.host,
         "port": args.port,
@@ -217,10 +218,11 @@ def main():
     if settings.DEBUG:
         print("Starting Uvicorn server in development mode")
         uvicorn_config["app"] = "app.main:create_app"
+        uvicorn_config["factory"] = True  # 添加这行
         uvicorn_config["reload"] = settings.DEBUG
-        uvicorn_config["workers"] = settings.WORKERS
     else:
-        app = create_app(args)
+        print("Starting Uvicorn server in production mode")
+        app = create_app()
         uvicorn_config["app"] = app
 
     print(f"Starting Uvicorn server in single-process mode on {args.host}:{args.port}")
