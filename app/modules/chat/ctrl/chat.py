@@ -163,7 +163,6 @@ def create_chat_routes(rag: LightRAG):
                     else:
                         try:
                             async for chunk in response:
-                                logging.info(f"chunk: {chunk}\n")
                                 if chunk:
                                     chunk_data = {
                                         "choices": [{
