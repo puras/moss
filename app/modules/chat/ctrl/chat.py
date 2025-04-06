@@ -1,32 +1,18 @@
 import json
 import logging
 import requests
-from typing import Optional, List, Dict, Any
 
 from ascii_colors import trace_exception
 from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 
 from lightrag import LightRAG, QueryParam
 from lightrag.api.routers.query_routes import QueryRequest, QueryResponse
 
 from app.core.config import settings
+from app.core.llm import CompletionsRequest
 
 router = APIRouter(prefix="/chat", tags=["会话"])
-
-# 添加OpenAI请求模型
-class ChatMessage(BaseModel):
-    role: str
-    content: str
-
-class CompletionsRequest(BaseModel):
-    model: str
-    messages: List[ChatMessage]
-    temperature: Optional[float] = 0.7
-    stream: Optional[bool] = False
-    max_tokens: Optional[int] = None
-    mode: Optional[str] = None
 
 def create_chat_routes(rag: LightRAG):
     
