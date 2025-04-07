@@ -13,98 +13,100 @@ from app.core.llm import CompletionsRequest
 
 router = APIRouter(prefix="/chat", tags=["会话"])
 
+async def chat_completions(request: CompletionsRequest):
+    try:
+        messages = request.messages
+        if not messages:
+            raise HTTPException(status_code=400, detail="消息列表不能为空")
+
+        # 转换消息格式为Ollama格式
+        ollama_messages = [{"role": msg.role, "content": msg.content} for msg in messages]
+
+        # 准备请求数据
+        data = {
+            "model": request.model or settings.LLM_MODEL_NAME or "deepseek-r1:32b",
+            "messages": ollama_messages,
+            "stream": request.stream,
+            "options": {
+                "temperature": request.temperature or 0.5
+            }
+        }
+
+        if request.stream:
+            async def stream_generator():
+                # 使用requests进行流式请求
+                response = requests.post(
+                    f"{settings.LLM_MODEL_HOST}/api/chat" if settings.LLM_MODEL == 'ollama' else f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
+                    json=data,
+                    stream=True
+                )
+
+                for line in response.iter_lines():
+                    if line:
+                        try:
+                            chunk = json.loads(line)
+                            if "error" in chunk:
+                                yield f"data: {json.dumps({'error': chunk['error']})}\n\n"
+                                continue
+
+                            chunk_data = {
+                                "choices": [{
+                                    "delta": {"content": chunk.get("message", {}).get("content", "")},
+                                    "finish_reason": "stop" if chunk.get("done", False) else None,
+                                    "index": 0
+                                }]
+                            }
+                            yield f"data: {json.dumps(chunk_data)}\n\n"
+
+                            # if chunk.get("done", False):
+                            #     yield "data: [DONE]\n\n"
+                        except json.JSONDecodeError as e:
+                            logging.error(f"JSON decode error: {str(e)}")
+                            continue
+
+            return StreamingResponse(
+                stream_generator(),
+                media_type="text/event-stream",
+                headers={
+                    "Cache-Control": "no-cache",
+                    "Connection": "keep-alive",
+                    "Content-Type": "text/event-stream",
+                    "X-Accel-Buffering": "no",
+                }
+            )
+        else:
+            # 非流式请求
+            response = requests.post(
+                f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
+                json=data
+            ) if settings.LLM_MODEL == 'ollama' else requests.post(
+                f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
+                json=data,
+            )
+
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+
+            result = response.json()
+            return {
+                "choices": [{
+                    "message": {
+                        "role": "assistant",
+                        "content": result.get("message", {}).get("content", "")
+                    },
+                    "finish_reason": "stop",
+                    "index": 0
+                }]
+            }
+
+    except Exception as e:
+        trace_exception(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 def create_chat_routes(rag: LightRAG):
     @router.post("/completions")
     async def completions(request: CompletionsRequest):
-        try:
-            messages = request.messages
-            if not messages:
-                raise HTTPException(status_code=400, detail="消息列表不能为空")
-
-            # 转换消息格式为Ollama格式
-            ollama_messages = [{"role": msg.role, "content": msg.content} for msg in messages]
-
-            # 准备请求数据
-            data = {
-                "model": request.model or settings.LLM_MODEL_NAME or "deepseek-r1:32b",
-                "messages": ollama_messages,
-                "stream": request.stream,
-                "options": {
-                    "temperature": request.temperature or 0.5
-                }
-            }
-
-            if request.stream:
-                async def stream_generator():
-                    # 使用requests进行流式请求
-                    response = requests.post(
-                        f"{settings.LLM_MODEL_HOST}/api/chat" if settings.LLM_MODEL == 'ollama' else f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
-                        json=data,
-                        stream=True
-                    )
-
-                    for line in response.iter_lines():
-                        if line:
-                            try:
-                                chunk = json.loads(line)
-                                if "error" in chunk:
-                                    yield f"data: {json.dumps({'error': chunk['error']})}\n\n"
-                                    continue
-
-                                chunk_data = {
-                                    "choices": [{
-                                        "delta": {"content": chunk.get("message", {}).get("content", "")},
-                                        "finish_reason": "stop" if chunk.get("done", False) else None,
-                                        "index": 0
-                                    }]
-                                }
-                                yield f"data: {json.dumps(chunk_data)}\n\n"
-
-                                # if chunk.get("done", False):
-                                #     yield "data: [DONE]\n\n"
-                            except json.JSONDecodeError as e:
-                                logging.error(f"JSON decode error: {str(e)}")
-                                continue
-
-                return StreamingResponse(
-                    stream_generator(),
-                    media_type="text/event-stream",
-                    headers={
-                        "Cache-Control": "no-cache",
-                        "Connection": "keep-alive",
-                        "Content-Type": "text/event-stream",
-                        "X-Accel-Buffering": "no",
-                    }
-                )
-            else:
-                # 非流式请求
-                response = requests.post(
-                    f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
-                    json=data
-                ) if settings.LLM_MODEL == 'ollama' else requests.post(
-                    f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
-                    json=data,
-                )
-
-                if response.status_code != 200:
-                    raise HTTPException(status_code=response.status_code, detail=response.text)
-
-                result = response.json()
-                return {
-                    "choices": [{
-                        "message": {
-                            "role": "assistant",
-                            "content": result.get("message", {}).get("content", "")
-                        },
-                        "finish_reason": "stop",
-                        "index": 0
-                    }]
-                }
-
-        except Exception as e:
-            trace_exception(e)
-            raise HTTPException(status_code=500, detail=str(e))
+        return await chat_completions(request)
 
     @router.post("/rag/completions")
     async def rag_completions(request: CompletionsRequest):
