@@ -13,3 +13,15 @@ class Prompt(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class PromptOptimizerTemplate(Base):
+    __tablename__ = "prompt_optimizer_template"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String(100), nullable=False)
+    name = Column(String(100), nullable=False)
+    content = Column(Text, nullable=False)
+    temp_type = Column(String(100), nullable=False)
+    builtin = Column(Boolean, default=True)
+    description = Column(String(500))

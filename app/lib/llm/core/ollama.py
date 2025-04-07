@@ -18,7 +18,7 @@ class OllamaAPI:
             返回模型列表
         """
         try:
-            response = await self._make_request('/ctrl/tags', {
+            response = await self._make_request('/api/tags', {
                 'method': 'GET',
                 'headers': {
                     'Content-Type': 'application/json'
@@ -65,7 +65,7 @@ class OllamaAPI:
         request_options = {**default_options, **(options or {})}
 
         try:
-            return await self._make_request('/ctrl/generate', {
+            return await self._make_request('/api/generate', {
                 'method': 'POST',
                 'headers': {
                     'Content-Type': 'application/json'
@@ -92,7 +92,7 @@ class OllamaAPI:
         }
 
         try:
-            await self._make_stream_request('/ctrl/generate', {
+            await self._make_stream_request('/api/generate', {
                 'method': 'POST',
                 'headers': {
                     'Content-Type': 'application/json'
