@@ -6,7 +6,7 @@ WORKDIR /work
 
 COPY . /work/
 
-RUN rm .env && mv .env.prod .env && chmod +x /work/start.sh && pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && pip install --no-cache-dir -r requirements.txt
+RUN rm .env && mv .env.prod .env && chmod +x /work/start.sh && pip install --no-cache-dir -r requirements.txt -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 
 ARG PORT=8000
 EXPOSE ${PORT}
