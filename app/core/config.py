@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     
     # API配置
     API_V1_STR: str = "/api/v1"
-    HOST: str = "0.0.0.0"
-    PORT: int = 8000
+    HOST: str = os.getenv("HOST", "0.0.0.0")
+    PORT: int = os.getenv("PORT", 8000)
     WORKERS: int = 4
     
     # 安全配置

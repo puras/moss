@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import sys
 
@@ -27,13 +28,13 @@ def parse_args(is_uvicorn_mode: bool=False):
 
     parser.add_argument(
         "--host",
-        default=os.getenv("HOST", "0.0.0.0"),
+        default=settings.HOST,
         help="Server host (default: from env or 0.0.0.0)",
     )
     parser.add_argument(
         "--port",
         type=int,
-        default=os.getenv("PORT", "8000"),
+        default=settings.PORT,
         help="Server port (default: from env or 8000)",
     )
 
