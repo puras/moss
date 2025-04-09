@@ -3,7 +3,7 @@ import logging
 import requests
 
 from ascii_colors import trace_exception
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from lightrag import LightRAG, QueryParam
@@ -13,9 +13,9 @@ from app.core.llm import CompletionsRequest
 
 router = APIRouter(prefix="/chat", tags=["会话"])
 
-async def chat_completions(request: CompletionsRequest):
+async def chat_completions(request: Request, body: CompletionsRequest):  # 修改函数签名
     try:
-        messages = request.messages
+        messages = body.messages  # 使用 body 替代 request
         if not messages:
             raise HTTPException(status_code=400, detail="消息列表不能为空")
 
@@ -24,45 +24,52 @@ async def chat_completions(request: CompletionsRequest):
 
         # 准备请求数据
         data = {
-            "model": request.model or settings.LLM_MODEL_NAME or "deepseek-r1:32b",
+            "model": body.model or settings.LLM_MODEL_NAME or "deepseek-r1:32b",
             "messages": ollama_messages,
-            "stream": request.stream,
+            "stream": body.stream,
             "options": {
-                "temperature": request.temperature or 0.5
+                "temperature": body.temperature or 0.5
             }
         }
 
-        if request.stream:
+        if body.stream:  # 使用 body 替代 request
             async def stream_generator():
-                # 使用requests进行流式请求
-                response = requests.post(
-                    f"{settings.LLM_MODEL_HOST}/api/chat" if settings.LLM_MODEL == 'ollama' else f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
-                    json=data,
-                    stream=True
-                )
+                response = None
+                try:
+                    # 使用requests进行流式请求
+                    response = requests.post(
+                        f"{settings.LLM_MODEL_HOST}/api/chat" if settings.LLM_MODEL == 'ollama' else f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
+                        json=data,
+                        stream=True
+                    )
+                    
+                    for line in response.iter_lines():
+                        if await request.is_disconnected():  # 现在可以正确访问 is_disconnected
+                            logging.info(f"Request {request.url} disconnected")
+                            break
+                            
+                        if line:
+                            try:
+                                chunk = json.loads(line)
+                                if "error" in chunk:
+                                    yield f"data: {json.dumps({'error': chunk['error']})}\n\n"
+                                    continue
 
-                for line in response.iter_lines():
-                    if line:
-                        try:
-                            chunk = json.loads(line)
-                            if "error" in chunk:
-                                yield f"data: {json.dumps({'error': chunk['error']})}\n\n"
+                                chunk_data = {
+                                    "choices": [{
+                                        "delta": {"content": chunk.get("message", {}).get("content", "")},
+                                        "finish_reason": "stop" if chunk.get("done", False) else None,
+                                        "index": 0
+                                    }]
+                                }
+                                yield f"data: {json.dumps(chunk_data)}\n\n"
+
+                            except json.JSONDecodeError as e:
+                                logging.error(f"JSON decode error: {str(e)}")
                                 continue
-
-                            chunk_data = {
-                                "choices": [{
-                                    "delta": {"content": chunk.get("message", {}).get("content", "")},
-                                    "finish_reason": "stop" if chunk.get("done", False) else None,
-                                    "index": 0
-                                }]
-                            }
-                            yield f"data: {json.dumps(chunk_data)}\n\n"
-
-                            # if chunk.get("done", False):
-                            #     yield "data: [DONE]\n\n"
-                        except json.JSONDecodeError as e:
-                            logging.error(f"JSON decode error: {str(e)}")
-                            continue
+                finally:
+                    if response:
+                        response.close()
 
             return StreamingResponse(
                 stream_generator(),
@@ -105,8 +112,8 @@ async def chat_completions(request: CompletionsRequest):
 
 def create_chat_routes(rag: LightRAG):
     @router.post("/completions")
-    async def completions(request: CompletionsRequest):
-        return await chat_completions(request)
+    async def completions(request: Request, body: CompletionsRequest):  # 修改路由处理函数
+        return await chat_completions(request, body)
 
     @router.post("/rag/completions")
     async def rag_completions(request: CompletionsRequest):
