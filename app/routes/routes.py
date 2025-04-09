@@ -3,7 +3,7 @@ from lightrag import LightRAG
 
 from app.modules import base, prompt
 from app.modules.chat.api import create_chat_routes
-from app.modules.edu.ctrl import edu
+from app.modules.edu.api import edu
 
 api_router = APIRouter()
 
