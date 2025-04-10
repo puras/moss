@@ -144,7 +144,6 @@ def _process_prompt(request: CompletionsRequest, target: str):
     messages.append(prompt_msg)
     logging.info(f"request: {request}")
 
-
 def _chat_completions(request: Request, body: CompletionsRequest):
     try:
         messages = body.messages
