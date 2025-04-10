@@ -95,7 +95,28 @@ async def analyze_activity_results(request: Request, body: CompletionsRequest):
 # 预设问题回答分析
 @router.post("/analyze/answers", summary="预设问题回答分析", description="预设问题回答分析")
 async def analyze_answers(request: Request, body: CompletionsRequest):
+    # 确保请求中包含问题和回复
+    if not body.messages or len(body.messages) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail="请求必须包含问题和回复消息"
+        )
+    
+    # 构建分析请求
+    question = body.messages[-2].content  # 倒数第二条是问题
+    answer = body.messages[-1].content    # 最后一条是回复
+    
+    # 添加系统提示
     _process_prompt(body, 'analyze_answers')
+    
+    # 添加分析指令
+    analysis_instruction = f"""
+    请分析以下问题和回答:
+    问题: {question}
+    回答: {answer}
+    """
+    body.messages.append(ChatMessage(role="user", content=analysis_instruction))
+    
     return _chat_completions(request, body)
 
 # 小组活动生成活动引导

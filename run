@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd /Users/puras/workspace/proj/moss
-PYTHONPATH=$PYTHONPATH:/Users/puras/workspace/proj/moss python app/main.py
+cd /home/moss/proj/moss
+PYTHONPATH=$PYTHONPATH:/home/moss/proj/moss python app/main.py
