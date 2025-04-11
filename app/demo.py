@@ -1,63 +1,62 @@
 import json
+import pandas as pd
+from openpyxl import load_workbook
+from openpyxl.styles import Alignment
+from openpyxl.utils import get_column_letter
 
-from app.core.llm.common import extract_json_from_llm_output
+file = "../local-db/000000/questions.json"
 
-response = """
-```json
-{
-    "questions": [
-        {
-            "question": "CIPP模型的过程评价包括哪些具体步骤？"
-        },
-        {
-            "question": "在CIPP模型的成果评价中，如何衡量干预措施的有效性？"
-        },
-        {
-            "question": "基于设计的研究（DBR）的主要特征是什么？"
-        },
-        {
-            "question": "DBR通用模型的核心阶段包括哪些内容？"
-        },
-        {
-            "question": "DBR三个阶段的要素和产出分别是什么？"
-        },
-        {
-            "question": "基于设计的研究与预测性研究有何区别？"
-        },
-        {
-            "question": "在DBR中，分析和探索阶段的主要任务有哪些？"
-        },
-        {
-            "question": "设计和建构阶段需要拟定哪些初步原则来指导干预的设计？"
-        },
-        {
-            "question": "评价和反思阶段的产出包括哪些内容？"
-        },
-        {
-            "question": "DBR产生的解决方案主要有哪些类型？"
-        },
-        {
-            "question": "如何理解基于设计的研究中的'迭代性'特征？"
-        },
-        {
-            "question": "在DBR中，理论与实践是如何结合的？"
-        }
-    ]
-}
-```
-"""
+def export_to_excel(data, output_file="../local-db/000000/questions.xlsx"):
+    # 准备数据
+    rows = []
+    for item in data:
+        chunk_id = item["chunkId"]
+        for question in item["questions"]:
+            rows.append({
+                "chunkId": chunk_id,
+                "question": question
+            })
+    
+    # 创建DataFrame并导出到Excel
+    df = pd.DataFrame(rows)
+    df.to_excel(output_file, index=False)
+    
+    # 处理合并单元格
+    wb = load_workbook(output_file)
+    ws = wb.active
+    
+    # 设置列宽
+    ws.column_dimensions['A'].width = 30
+    ws.column_dimensions['B'].width = 80
+    
+    # 合并相同chunkId的单元格
+    current_chunk = None
+    start_row = 2  # 从第2行开始(第1行是标题)
+    merge_ranges = []
+    
+    for i, row in enumerate(ws.iter_rows(min_row=2, max_col=1, values_only=True), start=2):
+        if row[0] != current_chunk:
+            if current_chunk is not None and start_row < i-1:
+                merge_ranges.append(f"A{start_row}:A{i-1}")
+            current_chunk = row[0]
+            start_row = i
+    
+    # 处理最后一组
+    if current_chunk is not None and start_row < ws.max_row:
+        merge_ranges.append(f"A{start_row}:A{ws.max_row}")
+    
+    # 执行合并
+    for merge_range in merge_ranges:
+        ws.merge_cells(merge_range)
+    
+    # 设置垂直居中
+    for row in ws.iter_rows():
+        for cell in row:
+            cell.alignment = Alignment(vertical='center')
+    
+    wb.save(output_file)
+    print(f"Excel文件已生成: {output_file}")
 
-question_ret = extract_json_from_llm_output(response)
-print(question_ret)
-if isinstance(question_ret, dict):
-    questions = question_ret["questions"]
-    new_questions = []
-    for question in questions:
-        if isinstance(question, dict):
-            question = question['question']
-            new_questions.append(question)
-        else:
-            new_questions.append(question)
-
-    question_ret = new_questions
-print(question_ret)
+with open(file) as f:
+    chunks = json.load(f)
+    export_to_excel(chunks)
