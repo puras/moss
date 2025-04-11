@@ -46,13 +46,7 @@ async def add_questions_for_chunk(project_id: str, chunk_id: str, new_questions:
         更新后的问题列表
     """
 
-    format_new_questions = new_questions
-    for question in new_questions:
-        if isinstance(question, dict):
-            question = question['question']
-        format_new_questions.append(question)
-
-    new_questions = format_new_questions
+    new_questions = new_questions or []
 
     questions = await get_questions(project_id)
 

@@ -124,8 +124,6 @@ async def gen_questions():
         if not chunk:
             raise HTTPException(status_code=404, detail="chunk not found")
 
-        logging.info(chunk)
-
         try:
             # 根据文本长度自动计算问题数量
             question_number = math.floor(len(chunk['content']) / question_generation_length)
@@ -144,6 +142,21 @@ async def gen_questions():
 
             # 从LLM输出中提取JSON格式的问题列表
             questions = extract_json_from_llm_output(response)
+            logging.info(f"questions: {questions}")
+
+            if isinstance(questions, dict):
+                qs = questions["questions"]
+                new_questions = []
+                for question in qs:
+                    if isinstance(question, dict):
+                        question = question['question']
+                        new_questions.append(question)
+                    else:
+                        new_questions.append(question)
+
+                questions = new_questions
+
+            logging.info(f"after questions:{questions}")
 
             if questions and isinstance(questions, list):
                 # 保存问题到数据库
