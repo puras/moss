@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse
 from lightrag import LightRAG, QueryParam
 
 from app.core.config import settings
-from app.core.llm import CompletionsRequest
+from app.core.llm.llm import CompletionsRequest
 
 router = APIRouter(prefix="/chat", tags=["会话"])
 

@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Request
 from starlette.responses import StreamingResponse
 
 from app.core.config import settings
-from app.core.llm import CompletionsRequest, ChatMessage
+from app.core.llm.llm import CompletionsRequest, ChatMessage
 from app.modules.edu.biz.prompt import edu_prompt_list
 
 router = APIRouter()

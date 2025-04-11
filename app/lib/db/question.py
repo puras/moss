@@ -1,10 +1,10 @@
 import os
-from typing import List, Dict, Any
+from typing import List, Any
 
 from .base import get_project_root, ensure_dir, read_json_file, write_json_file
 
 
-async def get_questions(project_id: str) -> List[Dict[str, Any]]:
+async def get_questions(project_id: str) -> List[dict[str, Any]]:
     """
     获取项目的所有问题
     Args:
@@ -19,7 +19,7 @@ async def get_questions(project_id: str) -> List[Dict[str, Any]]:
     return questions or []
 
 
-async def save_questions(project_id: str, questions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+async def save_questions(project_id: str, questions: List[dict[str, Any]]) -> List[dict[str, Any]]:
     """
     保存项目的问题列表
     Args:
@@ -42,8 +42,7 @@ async def save_questions(project_id: str, questions: List[Dict[str, Any]]) -> Li
         raise
 
 
-async def add_questions_for_chunk(project_id: str, chunk_id: str, new_questions: List[Dict[str, Any]]) -> List[
-    Dict[str, Any]]:
+async def add_questions_for_chunk(project_id: str, chunk_id: str, new_questions: List[dict[str, Any]]) -> List[dict[str, Any]]:
     """
     添加问题到项目
     Args:
@@ -53,6 +52,9 @@ async def add_questions_for_chunk(project_id: str, chunk_id: str, new_questions:
     Returns:
         更新后的问题列表
     """
+
+    new_questions = new_questions or []
+
     questions = await get_questions(project_id)
 
     # 检查是否已存在该文本块的问题
@@ -71,7 +73,7 @@ async def add_questions_for_chunk(project_id: str, chunk_id: str, new_questions:
     return await save_questions(project_id, questions)
 
 
-async def get_questions_for_chunk(project_id: str, chunk_id: str) -> List[Dict[str, Any]]:
+async def get_questions_for_chunk(project_id: str, chunk_id: str) -> List[dict[str, Any]]:
     """
     获取指定文本块的问题
     Args:
@@ -85,7 +87,7 @@ async def get_questions_for_chunk(project_id: str, chunk_id: str) -> List[Dict[s
     return chunk_questions['questions'] if chunk_questions else []
 
 
-async def delete_questions_for_chunk(project_id: str, chunk_id: str) -> List[Dict[str, Any]]:
+async def delete_questions_for_chunk(project_id: str, chunk_id: str) -> List[dict[str, Any]]:
     """
     删除指定文本块的问题
     Args:
@@ -99,7 +101,7 @@ async def delete_questions_for_chunk(project_id: str, chunk_id: str) -> List[Dic
     return await save_questions(project_id, updated_questions)
 
 
-async def delete_question(project_id: str, question_id: str, chunk_id: str) -> List[Dict[str, Any]]:
+async def delete_question(project_id: str, question_id: str, chunk_id: str) -> List[dict[str, Any]]:
     """
     删除单个问题
     Args:
@@ -134,7 +136,7 @@ async def delete_question(project_id: str, question_id: str, chunk_id: str) -> L
     return await save_questions(project_id, updated_questions)
 
 
-async def batch_delete_questions(project_id: str, questions_to_delete: List[Dict[str, str]]) -> List[Dict[str, Any]]:
+async def batch_delete_questions(project_id: str, questions_to_delete: List[dict[str, str]]) -> List[dict[str, Any]]:
     """
     批量删除问题
     Args:
