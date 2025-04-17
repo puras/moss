@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db
@@ -51,14 +51,15 @@ async def update_prompt(
 
 @router.post("/optimize")
 async def optimize_prompt_text(
-    request: PromptOptimizeRequest,
+    request: Request,
+    body: PromptOptimizeRequest,
     db: AsyncSession = Depends(get_db)
 ):
     """优化提示词"""
-    logging.info(f"request: {request}")
-    template = await optimizer_template.get_template_by_code(db, request.template_code)
+    logging.info(f"request body: {body}")
+    template = await optimizer_template.get_template_by_code(db, body.template_code)
     logging.info(f"template: {template.code}")
     if not template:
         raise HTTPException(status_code=404, detail="优化模板不存在")
 
-    return await optimize_prompt(request.prompt, request.model, template, request.stream)
+    return await optimize_prompt(request, body.prompt, body.model, template, body.stream)
