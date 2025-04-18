@@ -50,6 +50,16 @@ async def summary_exam_guides(request: Request, body: CompletionsRequest):
     _process_prompt(body, 'summary_exam_guides')
     return _chat_completions(request, body)
 
+@router.post("/gen/test_questions", summary="考前指导-测试题", description="考前指导-测试题")
+async def gen_test_questions(request: Request, body: CompletionsRequest):
+    _process_prompt(body, 'gen_test_questions')
+    return _chat_completions(request, body)
+
+@router.post("/analyze/exam_test_weak", summary="考前指导测试结果分析", description="考前指导测试结果分析")
+async def analyze_exam_test_weak(request: Request, body: CompletionsRequest):
+    _process_prompt(body, 'analyze_exam_test_weak')
+    return _chat_completions(request, body)
+
 # 学习方法问答
 @router.post("/chat/learning_methods", summary="学习方法问答", description="学习方法问答")
 async def chat_learning_methods(request: Request, body: CompletionsRequest):
