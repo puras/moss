@@ -84,7 +84,7 @@ async def chat_completions(request: Request, body: CompletionsRequest):  # 修�
         else:
             # 非流式请求
             response = requests.post(
-                f"{settings.LLM_MODEL_HOST}/v1/chat/completions" if settings.LLM_MODEL == 'ollama' else f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
+                f"{settings.LLM_MODEL_HOST}/api/chat" if settings.LLM_MODEL == 'ollama' else f"{settings.LLM_MODEL_HOST}/v1/chat/completions",
                 json=data
             )
 
